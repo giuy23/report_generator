@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 // import { route } from 'ziggy-js';
+import { IForm } from '@/Interfaces/FormInterfaces';
+import { fetchData } from '@/composables/useGenerateReport'
 
 const isLoading = ref(false);
 const buttonText = ref('Enviar');
 
 
-const getDateMonth = (dayInitial = false) => {
+const getDateMonth = (dayInitial: boolean = false): string => {
     const month = Number(new Date().getMonth()) + 1;
     const year = new Date().getFullYear();
 
@@ -17,10 +19,6 @@ const getDateMonth = (dayInitial = false) => {
     return `${year}-${String(month).padStart(2, "0")}-${day}`
 }
 
-interface IForm {
-    startDate: string,
-    endDate: string
-}
 
 const initialDates: IForm = {
     startDate: getDateMonth(true),
@@ -28,17 +26,13 @@ const initialDates: IForm = {
 };
 
 const formDates: IForm = reactive({ ...initialDates });
-console.log(initialDates);
 
 const sendDatesReport = async () => {
     isLoading.value = true;
     buttonText.value = 'Exportando...';
 
     try {
-        const { data } = await axios.post(route('report.generate'), {
-            end_date: formDates.endDate,
-            start_date: formDates.startDate
-        })
+        const { data } = await fetchData(formDates);
 
         const file = data.file;
         const exists = await waitForReport(file);
@@ -63,7 +57,7 @@ const sendDatesReport = async () => {
 }
 
 
-const waitForReport = async (file: string) => {
+const waitForReport = async (file: string): Promise<boolean> => {
     const attempts = 5
     const interval_time = 3000
 
@@ -91,7 +85,7 @@ const waitForReport = async (file: string) => {
         <form @submit.prevent="sendDatesReport" class="flex flex-col sm:flex-row gap-3 items-end border border-solid border-indigo-500 p-10
          rounded-xl">
             <div>
-                <label for="start_date" class="block text-xs text-gray-600 mb-1">
+                <label for="start_date" class="block text-xs text-gray-200 mb-1">
                     Fecha inicio
                 </label>
                 <input type="date" id="start_date" name="start_date" v-model="formDates.startDate"
@@ -99,7 +93,7 @@ const waitForReport = async (file: string) => {
             </div>
 
             <div>
-                <label for="end_date" class="block text-xs text-gray-600 mb-1">
+                <label for="end_date" class="block text-xs text-gray-200 mb-1">
                     Fecha fin
                 </label>
                 <input type="date" id="end_date" name="end_date" v-model="formDates.endDate"

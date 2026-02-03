@@ -13,7 +13,6 @@ class GenerateReportJob implements ShouldQueue
 
     public string $start_date;
     public string $end_date;
-
     public string $file_name;
 
     public function __construct(string $start_date, string $end_date, string $file_name)
